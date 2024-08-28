@@ -4,7 +4,6 @@ import {
   ChevronRightIcon,
   SearchIcon,
   RefreshIcon,
-  DownloadIcon,
 } from "@heroicons/react/outline";
 import ViewWeekOutlinedIcon from "@mui/icons-material/ViewWeekOutlined";
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
@@ -17,7 +16,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 const API_URL = "https://jsonplaceholder.typicode.com/users";
 
-export default function Waitlist() {
+export default function DataTable() {
   const [columns, setColumns] = useState([
     { name: "Name", key: "name", visible: true, sortable: true },
     { name: "Email", key: "email", visible: true, sortable: true },
@@ -175,196 +174,166 @@ export default function Waitlist() {
       <ToastContainer />
       <div className="mb-4">
         <h2 className="text-lg font-bold text-[#1995AD] mb-2">Dashboard</h2>
-      </div>
-      <div className="flex justify-between mb-4">
-        <div className="flex-1">
+        <p className="text-gray-600 mb-4">Manage your columns.</p>
+        <div className="flex items-center mb-4">
+          <Tooltip title="Refresh">
+            <button onClick={handleRefresh} className="mr-2 text-gray-500 hover:text-gray-700">
+              <RefreshIcon className="w-5 h-5" />
+            </button>
+          </Tooltip>
+          <Tooltip title="Column Management">
+            <button onClick={toggleColumnDropdown} className="mr-2 text-gray-500 hover:text-gray-700">
+              <ViewWeekOutlinedIcon className="w-5 h-5" />
+            </button>
+          </Tooltip>
           <div className="relative">
             <input
               type="text"
+              placeholder="Search..."
               value={searchQuery}
               onChange={handleSearch}
-              placeholder="Search client"
-              className="pl-8 pr-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="p-2 border border-gray-300 rounded-md"
             />
-            <SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <SearchIcon className="w-5 h-5 absolute right-2 top-2 text-gray-500" />
           </div>
         </div>
-        <div className="flex items-center space-x-4">
-          <Tooltip title="Reset Column">
-            <button
-              className="px-3 py-1 bg-white rounded-md text-gray-700 hover:bg-gray-100"
-              onClick={handleRefresh}
-            >
-              <RefreshIcon className="w-5 h-5 text-[#1995AD]" />
-            </button>
-          </Tooltip>
-
-          <Tooltip title="Edit Columns">
-            <button
-              className="px-3 py-1 bg-white rounded-md text-gray-700 hover:bg-gray-100"
-              onClick={toggleColumnDropdown}
-            >
-              <ViewWeekOutlinedIcon className="w-5 h-5 text-[#1995AD]" />
-            </button>
-          </Tooltip>
-
-          {showColumnDropdown && (
-            <ColumnDropdown
-              columns={columns}
-              handleColumnChange={handleColumnChange}
-              handleClose={toggleColumnDropdown}
-            />
-          )}
-        </div>
-      </div>
-
-      <div className="overflow-x-auto">
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="droppable" direction="horizontal">
-            {(provided) => (
-              <table className="w-full bg-white border border-gray-300">
-                <thead
-                  className="h-12 bg-gradient-to-r from-[#A1D6E2] to-[#1995AD] text-white"
+        {showColumnDropdown && (
+          <ColumnDropdown
+            columns={columns}
+            handleColumnChange={handleColumnChange}
+            handleClose={() => setShowColumnDropdown(false)}
+          />
+        )}
+        <div className="overflow-x-auto">
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="droppable" direction="horizontal">
+              {(provided) => (
+                <div
+                  className="flex"
                   ref={provided.innerRef}
                   {...provided.droppableProps}
                 >
-                  <tr>
-                    <th className="border-b py-2 px-4 border-gray-300 font-semibold w-1">
-                      <input
-                        type="checkbox"
-                        checked={allRowsSelected}
-                        onChange={(e) => handleSelectAllClick(e.target.checked)}
-                      />
-                    </th>
-                    {columns.map((col, index) =>
-                      col.visible ? (
-                        <Draggable key={col.key} draggableId={col.key} index={index}>
-                          {(provided) => (
-                            <th
-                              className="relative text-left border-b border-gray-300 font-semibold cursor-pointer"
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              onClick={() => col.sortable && handleSort(col.key)}
-                            >
-                              {col.name}
-                              {sortConfig.key === col.key && (
-                                <span className="absolute right-2 top-1/2 transform -translate-y-1/2">
-                                  {sortConfig.direction === 'asc' ? (
-                                    <ArrowUpwardIcon className="text-black-500" />
-                                  ) : (
-                                    <ArrowDownwardIcon className="text-black-500" />
-                                  )}
-                                </span>
+                  {columns.map((column, index) =>
+                    column.visible ? (
+                      <Draggable
+                        key={column.key}
+                        draggableId={column.key}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            className="p-2 border border-gray-300 rounded-md bg-gray-100 mr-2"
+                          >
+                            <div className="flex items-center">
+                              <span className="font-bold">{column.name}</span>
+                              {column.sortable && (
+                                <div className="ml-2 flex space-x-1">
+                                  <ArrowUpwardIcon
+                                    className={`cursor-pointer ${
+                                      sortConfig.key === column.key && sortConfig.direction === 'asc'
+                                        ? 'text-blue-500'
+                                        : ''
+                                    }`}
+                                    onClick={() => handleSort(column.key)}
+                                  />
+                                  <ArrowDownwardIcon
+                                    className={`cursor-pointer ${
+                                      sortConfig.key === column.key && sortConfig.direction === 'desc'
+                                        ? 'text-blue-500'
+                                        : ''
+                                    }`}
+                                    onClick={() => handleSort(column.key)}
+                                  />
+                                </div>
                               )}
-                              <span className="absolute inset-0"></span>
-                            </th>
-                          )}
-                        </Draggable>
-                      ) : null
-                    )}
-                    {provided.placeholder}
-                  </tr>
-                </thead>
-                <tbody>
-            {paginatedData.map((row, rowIndex) => (
-              <tr
-                key={rowIndex}
-                className={`hover:bg-gray-50 ${isSelected((currentPage - 1) * rowsPerPage + rowIndex)
-                  ? "bg-gray-200"
-                  : ""
-                  }`}
-              >
-                <td className="border-b py-2 px-4 border-gray-300 font-semibold w-1">
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ) : null
+                  )}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+          <table className="min-w-full mt-4">
+            <thead>
+              <tr className="bg-gray-200">
+                <th>
                   <input
                     type="checkbox"
-                    checked={isSelected(
-                      (currentPage - 1) * rowsPerPage + rowIndex
-                    )}
-                    onChange={() =>
-                      handleRowCheckboxChange(
-                        (currentPage - 1) * rowsPerPage + rowIndex
-                      )
-                    }
+                    checked={allRowsSelected}
+                    onChange={(e) => handleSelectAllClick(e.target.checked)}
+                    className="p-2 border border-gray-300 rounded-md"
                   />
-                </td>
-                {columns.map(
-                  (col) =>
-                    col.visible && (
-                      <td
-                        key={col.key}
-                        className="py-2 border-b border-gray-300"
-                      >
-                        <input
-                          type="text"
-                          value={row[col.key]}
-                          onChange={(e) =>
-                            handleEdit(
-                              (currentPage - 1) * rowsPerPage + rowIndex,
-                              col.key,
-                              e.target.value
-                            )
-                          }
-                          className="w-full text-left border-none bg-transparent"
-                        />
-                      </td>
-                    )
-                )}
+                </th>
+                {columns
+                  .filter((col) => col.visible)
+                  .map((col) => (
+                    <th key={col.key} className="p-2 border border-gray-300">
+                      {col.name}
+                    </th>
+                  ))}
               </tr>
-            ))}
-                </tbody>
-              </table>
-            )}
-          </Droppable>
-        </DragDropContext>
-      </div>
-      <div className="mt-4 flex justify-between items-center">
-        <div className="flex-grow" />
-        <div className="flex space-x-2">
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              handlePageChange(currentPage - 1);
-            }}
-            className={`flex items-center px-3 py-1 text-gray-700 rounded-md ${currentPage === 1
-              ? "opacity-50 cursor-default"
-              : "hover:bg-gray-200"
-              }`}
+            </thead>
+            <tbody>
+              {paginatedData.length ? (
+                paginatedData.map((row, rowIndex) => (
+                  <tr
+                    key={rowIndex}
+                    className={`cursor-pointer ${
+                      isSelected((currentPage - 1) * rowsPerPage + rowIndex) ? 'bg-gray-100' : ''
+                    }`}
+                  >
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={isSelected((currentPage - 1) * rowsPerPage + rowIndex)}
+                        onChange={() => handleRowCheckboxChange((currentPage - 1) * rowsPerPage + rowIndex)}
+                        className="p-2 border border-gray-300 rounded-md"
+                      />
+                    </td>
+                    {columns
+                      .filter((col) => col.visible)
+                      .map((col) => (
+                        <td key={col.key} className="p-2 border border-gray-300">
+                          {row[col.key]}
+                        </td>
+                      ))}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={columns.filter((col) => col.visible).length + 1} className="p-2 text-center">
+                    No data available
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex justify-between items-center mt-4">
+          <button
+            disabled={currentPage <= 1}
+            onClick={() => handlePageChange(currentPage - 1)}
+            className="px-4 py-2 bg-gray-200 rounded-md text-gray-700 hover:bg-gray-300"
           >
-            <ChevronLeftIcon className="h-4 w-4 mr-1" />
-            Previous
-          </a>
-          {Array.from({ length: pageCount }, (_, index) => (
-            <a
-              key={index}
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                handlePageChange(index + 1);
-              }}
-              className={`flex items-center px-3 py-1 rounded-md ${currentPage === index + 1
-                ? "bg-[#1995AD] text-white"
-                : "text-gray-700 hover:bg-gray-200"
-                }`}
-            >
-              {index + 1}
-            </a>
-          ))}
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              handlePageChange(currentPage + 1);
-            }}
-            className={`flex items-center px-3 py-1 text-gray-700 rounded-md ${currentPage === pageCount
-              ? "opacity-50 cursor-default"
-              : "hover:bg-gray-200"
-              }`}
+            <ChevronLeftIcon className="w-5 h-5" />
+          </button>
+          <span className="text-gray-700">
+            Page {currentPage} of {pageCount}
+          </span>
+          <button
+            disabled={currentPage >= pageCount}
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="px-4 py-2 bg-gray-200 rounded-md text-gray-700 hover:bg-gray-300"
           >
-            Next
-            <ChevronRightIcon className="h-4 w-4 ml-1" />
-          </a>
+            <ChevronRightIcon className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </div>
