@@ -17,6 +17,7 @@ import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 const API_URL = "https://jsonplaceholder.typicode.com/users";
 
 export default function DataTable() {
+  
   const [columns, setColumns] = useState([
     { name: "Name", key: "name", visible: true, sortable: true },
     { name: "Email", key: "email", visible: true, sortable: true },
